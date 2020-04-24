@@ -1,2 +1,51 @@
 ---
 # tasks file for ansible-role-docker
+
+# Nuke existing docker packages
+- name: Remove existing docker packages
+  package:
+    name:
+      - docker
+      - docker-client
+      - docker-client-latest
+      - docker-common
+      - docker-latest
+      - docker-latest-logrotate
+      - docker-logrotate
+      - docker-engine
+    state: absent
+
+- name: install yum-utils
+  package:
+    name: yum-utils
+    state: present
+
+- name: Add repository
+  yum_repository:
+    name: epel
+    description: Docker Repo
+    baseurl: https://download.docker.com/linux/centos/docker-ce.repo
+
+- name: install docker packages
+  package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: present
+
+- name: Creates service directory
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+
+- name: Create service file
+  template:
+    src: options.conf.j2
+    dest: /etc/systemd/system/docker.service.d/options.conf
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+    - restart docker
+    
