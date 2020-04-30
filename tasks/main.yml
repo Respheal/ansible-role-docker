@@ -24,7 +24,8 @@
   yum_repository:
     name: epel
     description: Docker Repo
-    baseurl: https://download.docker.com/linux/centos/docker-ce.repo
+    baseurl: https://download.docker.com/linux/centos/7/x86_64/stable/
+    gpgcheck: no
 
 - name: install docker packages
   package:
@@ -48,4 +49,13 @@
     mode: 0600
   notify:
     - restart docker
-    
+
+- name: Add local registry config
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+    - restart docker
