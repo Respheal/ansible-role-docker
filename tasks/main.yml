@@ -40,6 +40,11 @@
     path: /etc/systemd/system/docker.service.d
     state: directory
 
+- name: Creates service directory
+  file:
+    path: /etc/docker/
+    state: directory
+
 - name: Create service file
   template:
     src: options.conf.j2
@@ -50,12 +55,12 @@
   notify:
     - restart docker
 
-- name: Add local registry config
-  template:
-    src: daemon.json.j2
-    dest: /etc/docker/daemon.json
-    owner: root
-    group: root
-    mode: 0600
-  notify:
-    - restart docker
+#- name: Add local registry config
+#  template:
+#    src: daemon.json.j2
+#    dest: /etc/docker/daemon.json
+#    owner: root
+#    group: root
+#    mode: 0600
+#  notify:
+#    - restart docker

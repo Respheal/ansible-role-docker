@@ -1,4 +1,4 @@
 ---
 # defaults file for ansible-role-docker
 
-registry_ip: 192.168.0.223
+registry_ip: ${WS_REGISTRY}
