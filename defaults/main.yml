@@ -2,3 +2,4 @@
 # defaults file for ansible-role-docker
 
 registry_ip: ${WS_REGISTRY}
+docker_swarm: true

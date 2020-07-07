@@ -1,0 +1,46 @@
+
+---
+- name: Check if Swarm has already been Initialized
+  shell: docker node ls
+  register: swarm_status
+  ignore_errors: true
+  when:
+    - docker_master
+
+- name: Initialize Docker Swarm
+  shell: >
+        docker swarm init
+        --advertise-addr={{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:2377
+  when:
+    - swarm_status.rc != 0
+    - docker_master
+  run_once: true
+
+- name: Get the worker join-token
+  shell: docker swarm join-token --quiet worker
+  register: worker_token
+  when: docker_master
+
+- name: Add Workers to the Swarm
+  shell: "docker swarm join --token {{ hostvars['docker.me.imhadmin.net']['worker_token']['stdout'] }} {{ hostvars['docker.me.imhadmin.net']['ansible_default_ipv4']['address'] }}:2377"
+  when:
+    - not docker_master
+    - hostvars['docker.me.imhadmin.net']['swarm_status']['rc'] == 1
+
+- name: Add local registry config
+  template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: 0600
+  notify:
+    - restart docker
+
+- name: Update /etc/hosts
+  template:
+    src: hosts.j2
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: 0600
